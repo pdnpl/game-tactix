@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Tactix — tic-tac-toe</title>
+    <meta
+      name="description"
+      content="A fast, beautiful game of tic-tac-toe. Play solo against an unbeatable AI, or pass and play."
+    />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#08080c" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      // Applied before first paint so the correct theme is never repainted.
+      try {
+        const saved = localStorage.getItem('tactix.theme')
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div class="glow" aria-hidden="true"></div>
+
+    <main class="app">
+      <header class="masthead">
+        <h1 class="wordmark">Tac<span>tix</span></h1>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch to light theme">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path class="icon-moon" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" />
+            <g class="icon-sun">
+              <circle cx="12" cy="12" r="4.2" />
+              <path
+                d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"
+              />
+            </g>
+          </svg>
+        </button>
+      </header>
+
+      <div class="controls">
+        <div class="segmented" role="radiogroup" aria-label="Opponent">
+          <button type="button" role="radio" data-mode="ai" aria-checked="true">Solo</button>
+          <button type="button" role="radio" data-mode="hotseat" aria-checked="false">
+            Two players
+          </button>
+        </div>
+        <div class="segmented" id="difficulty" role="radiogroup" aria-label="Difficulty">
+          <button type="button" role="radio" data-difficulty="easy" aria-checked="false">
+            Easy
+          </button>
+          <button type="button" role="radio" data-difficulty="medium" aria-checked="false">
+            Medium
+          </button>
+          <button type="button" role="radio" data-difficulty="unbeatable" aria-checked="true">
+            Unbeatable
+          </button>
+        </div>
+      </div>
+
+      <section class="scoreboard" aria-label="Score">
+        <div class="score score-x">
+          <span class="score-label" id="label-x">You</span>
+          <span class="score-value" id="score-x" aria-labelledby="label-x">0</span>
+        </div>
+        <div class="score score-draw">
+          <span class="score-label" id="label-draw">Draws</span>
+          <span class="score-value" id="score-draw" aria-labelledby="label-draw">0</span>
+        </div>
+        <div class="score score-o">
+          <span class="score-label" id="label-o">Tactix</span>
+          <span class="score-value" id="score-o" aria-labelledby="label-o">0</span>
+        </div>
+      </section>
+
+      <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="Tic-tac-toe board"></div>
+        <svg class="strike" id="strike" aria-hidden="true" focusable="false">
+          <line x1="0" y1="0" x2="0" y2="0" pathLength="1" />
+        </svg>
+      </div>
+
+      <p class="status" id="status" role="status" aria-live="polite">Your turn</p>
+
+      <button class="primary" id="again" type="button" hidden>Play again</button>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

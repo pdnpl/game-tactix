@@ -1,0 +1,8 @@
+name = "tactix"
+compatibility_date = "2026-08-01"
+
+# Static-asset-only Worker: Cloudflare serves dist/ straight from its edge cache
+# and no Worker script runs, so there is no per-request compute or cold start.
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"

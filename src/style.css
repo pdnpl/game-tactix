@@ -1,0 +1,511 @@
+/* ---------------------------------------------------------------- tokens */
+
+:root {
+  --x: #38bdf8;
+  --o: #fb7185;
+  --x-glow: rgba(56, 189, 248, 0.55);
+  --o-glow: rgba(251, 113, 133, 0.55);
+
+  --radius-card: 26px;
+  --radius-cell: 17px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --font:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Inter, 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+[data-theme='dark'] {
+  --bg: #08080c;
+  --text: #f2f2f6;
+  --muted: #8f8fa0;
+  --surface: rgba(255, 255, 255, 0.035);
+  --surface-hi: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hi: rgba(255, 255, 255, 0.16);
+  --card: rgba(255, 255, 255, 0.028);
+  --shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.9);
+  --glow-a: rgba(56, 189, 248, 0.16);
+  --glow-b: rgba(251, 113, 133, 0.14);
+}
+
+[data-theme='light'] {
+  --bg: #f4f5f9;
+  --text: #14141c;
+  --muted: #67677a;
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface-hi: #ffffff;
+  --border: rgba(18, 18, 34, 0.09);
+  --border-hi: rgba(18, 18, 34, 0.18);
+  --card: rgba(255, 255, 255, 0.72);
+  --shadow: 0 30px 60px -30px rgba(20, 20, 45, 0.35);
+  --glow-a: rgba(56, 189, 248, 0.3);
+  --glow-b: rgba(251, 113, 133, 0.26);
+  --x: #0284c7;
+  --o: #e11d48;
+}
+
+/* ----------------------------------------------------------------- reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 3vw, 2rem);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--x);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Two large, soft colour fields. Fixed and non-interactive, so they never
+   participate in layout or hit-testing. */
+.glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(46rem 46rem at 18% 8%, var(--glow-a), transparent 60%),
+    radial-gradient(40rem 40rem at 85% 92%, var(--glow-b), transparent 62%);
+}
+
+/* ------------------------------------------------------------------ card */
+
+.app {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 25.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.9rem, 2.6vw, 1.35rem);
+  padding: clamp(1.1rem, 4vw, 1.85rem);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px) saturate(1.4);
+  animation: rise 0.55s var(--ease) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wordmark {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.wordmark span {
+  background: linear-gradient(100deg, var(--x), var(--o));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    transform 0.2s var(--ease-back);
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  border-color: var(--border-hi);
+  transform: rotate(-18deg);
+}
+
+.icon-btn svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+[data-theme='dark'] .icon-sun,
+[data-theme='light'] .icon-moon {
+  display: none;
+}
+
+/* -------------------------------------------------------------- controls */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.segmented button {
+  padding: 0.44rem 0.3rem;
+  border-radius: 9px;
+  font-size: 0.79rem;
+  font-weight: 550;
+  color: var(--muted);
+  transition:
+    color 0.18s,
+    background-color 0.18s;
+}
+
+.segmented button:hover {
+  color: var(--text);
+}
+
+.segmented button[aria-checked='true'] {
+  color: var(--text);
+  background: var(--surface-hi);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+}
+
+#difficulty {
+  transition:
+    opacity 0.25s var(--ease),
+    transform 0.25s var(--ease);
+}
+
+/* Kept in the DOM (so the grid never reflows) but inert when playing a human. */
+#difficulty[data-hidden='true'] {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------ scoreboard */
+
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.score {
+  padding: 0.5rem 0.25rem;
+  border-radius: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.score-label {
+  display: block;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score-value {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 1.22rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.score-x .score-value {
+  color: var(--x);
+}
+.score-o .score-value {
+  color: var(--o);
+}
+
+/* A brief pop when a tally changes, so the score never updates unnoticed. */
+.score-value.bump {
+  animation: bump 0.42s var(--ease-back);
+}
+
+@keyframes bump {
+  40% {
+    transform: scale(1.32);
+  }
+}
+
+/* ----------------------------------------------------------------- board */
+
+.board-wrap {
+  position: relative;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.4rem, 1.8vw, 0.6rem);
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-cell);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  padding: 14%;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    transform 0.2s var(--ease);
+}
+
+.cell[data-playable='true']:hover {
+  background: var(--surface-hi);
+  border-color: var(--border-hi);
+  transform: translateY(-2px);
+}
+
+.cell[data-playable='true']:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.cell[data-playable='false'] {
+  cursor: default;
+}
+
+.cell svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 11;
+}
+
+.mark-x {
+  stroke: var(--x);
+  filter: drop-shadow(0 0 9px var(--x-glow));
+}
+
+.mark-o {
+  stroke: var(--o);
+  filter: drop-shadow(0 0 9px var(--o-glow));
+}
+
+/* Strokes draw themselves in. pathLength="1" normalises every shape so one
+   dash rule covers both marks regardless of their real geometry. */
+.cell svg [pathLength] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.32s var(--ease) forwards;
+}
+
+.cell svg [pathLength]:nth-child(2) {
+  animation-delay: 0.11s;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The faint preview of the mark you would place. */
+.ghost {
+  position: absolute;
+  inset: 14%;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+
+.cell[data-playable='true']:hover .ghost,
+.cell[data-playable='true']:focus-visible .ghost {
+  opacity: 0.2;
+}
+
+.ghost svg [pathLength] {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+
+.ghost svg {
+  filter: none;
+}
+
+.cell[data-win='true'] {
+  border-color: transparent;
+  animation: winpulse 1.5s var(--ease) infinite;
+}
+
+@keyframes winpulse {
+  50% {
+    background: var(--surface-hi);
+  }
+}
+
+/* Dim the cells that had nothing to do with the win. */
+.board[data-over='true'] .cell:not([data-win='true']) svg {
+  opacity: 0.28;
+  filter: none;
+  transition: opacity 0.4s;
+}
+
+/* The line struck through the winning triple. Coordinates are in board
+   units (0-3), so cell centres land on x.5 at any screen size. */
+.strike {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* stroke-width is set in script, in the same pixel units as the viewBox. */
+.strike line {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.strike.is-x {
+  color: var(--x);
+}
+.strike.is-o {
+  color: var(--o);
+}
+
+.strike[data-show='true'] line {
+  animation: draw 0.42s 0.18s var(--ease) forwards;
+}
+
+/* ---------------------------------------------------------------- status */
+
+.status {
+  margin: 0;
+  min-height: 1.4em;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 550;
+  color: var(--muted);
+}
+
+.status.shift {
+  animation: shift 0.3s var(--ease);
+}
+
+@keyframes shift {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+.status b {
+  font-weight: 700;
+}
+
+.status .is-x {
+  color: var(--x);
+}
+.status .is-o {
+  color: var(--o);
+}
+
+.primary {
+  padding: 0.68rem;
+  border-radius: 13px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--bg);
+  background: linear-gradient(100deg, var(--x), var(--o));
+  transition:
+    transform 0.2s var(--ease-back),
+    filter 0.2s;
+  animation: rise 0.32s var(--ease) both;
+}
+
+[data-theme='light'] .primary {
+  color: #fff;
+}
+
+.primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.primary:active {
+  transform: translateY(0);
+}
+
+.primary[hidden] {
+  display: none;
+}
+
+/* --------------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .cell svg [pathLength],
+  .strike line {
+    stroke-dashoffset: 0;
+  }
+}

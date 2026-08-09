@@ -1,0 +1,25 @@
+{
+  "name": "tactix",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "deploy": "npm run build && wrangler deploy",
+    "cf:dev": "npm run build && wrangler dev"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.120.0"
+  }
+}
