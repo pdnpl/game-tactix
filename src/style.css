@@ -393,11 +393,19 @@ button {
   }
 }
 
-/* Dim the cells that had nothing to do with the win. */
-.board[data-over='true'] .cell:not([data-win='true']) svg {
+/* Dim the cells that had nothing to do with the win, to spotlight the line.
+   Scoped to a win on purpose: in a draw nothing lost, so nothing is dimmed. */
+.board[data-result='win'] .cell:not([data-win='true']) svg {
   opacity: 0.28;
   filter: none;
   transition: opacity 0.4s;
+}
+
+/* A draw keeps every mark at full strength and simply drops the glow, so the
+   board reads as settled rather than switched off. */
+.board[data-result='draw'] .cell svg {
+  filter: none;
+  transition: filter 0.4s;
 }
 
 /* The line struck through the winning triple. Coordinates are in board

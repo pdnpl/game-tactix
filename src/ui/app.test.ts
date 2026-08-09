@@ -151,6 +151,45 @@ describe('hot-seat', () => {
   })
 })
 
+describe('draw', () => {
+  const playToDraw = () => {
+    document.querySelector<HTMLButtonElement>('[data-mode="hotseat"]')!.click()
+    for (const i of [4, 0, 1, 7, 6, 2, 5, 3, 8]) click(i)
+  }
+
+  it('recognises the draw and counts it', () => {
+    playToDraw()
+    expect(status()).toBe("It's a draw")
+    expect(document.querySelector('#score-draw')!.textContent).toBe('1')
+  })
+
+  it('does not dim the board, because nothing lost', () => {
+    playToDraw()
+    // The spotlight rule keys off data-result, so a draw must not report "win".
+    expect(document.querySelector<HTMLElement>('#board')!.dataset.result).toBe('draw')
+    expect(
+      [...document.querySelectorAll<HTMLElement>('.cell')].every((c) => c.dataset.win === 'false'),
+    ).toBe(true)
+  })
+
+  it('draws no strike line', () => {
+    playToDraw()
+    expect(document.querySelector<SVGElement>('#strike')!.dataset.show).toBe('false')
+  })
+
+  it('marks the board as won only when someone actually wins', () => {
+    document.querySelector<HTMLButtonElement>('[data-mode="hotseat"]')!.click()
+    for (const i of [0, 3, 1, 4, 2]) click(i)
+    expect(document.querySelector<HTMLElement>('#board')!.dataset.result).toBe('win')
+  })
+
+  it('returns to playing on the next round', () => {
+    playToDraw()
+    document.querySelector<HTMLButtonElement>('#again')!.click()
+    expect(document.querySelector<HTMLElement>('#board')!.dataset.result).toBe('playing')
+  })
+})
+
 describe('play again', () => {
   it('is hidden until the round ends, then clears the board', () => {
     const again = document.querySelector<HTMLButtonElement>('#again')!

@@ -52,6 +52,7 @@ export function mount(root: ParentNode = document): () => void {
   // Starts as `undefined` rather than `null` so the first render, on a board
   // that is legitimately all-null, still paints every cell.
   let painted: (Cell | undefined)[] = Array(9).fill(undefined)
+  let paintedResult: State['outcome']['kind'] | undefined
   let paintedScore = { ...state.score }
   let paintedStatus = ''
 
@@ -143,19 +144,21 @@ export function mount(root: ParentNode = document): () => void {
   }
 
   function render() {
-    const over = state.outcome.kind !== 'playing'
+    const result = state.outcome.kind
+    const over = result !== 'playing'
 
     for (let i = 0; i < 9; i += 1) {
       // Repaint a cell when its mark changed, or when the round ended or began
       // (which flips playability and clears ghosts across the whole board).
-      if (painted[i] !== state.board[i] || over !== (els.board.dataset.over === 'true')) {
+      if (painted[i] !== state.board[i] || result !== paintedResult) {
         paintCell(i)
       }
       const inWin = state.outcome.kind === 'win' && state.outcome.line.includes(i)
       cells[i].dataset.win = String(inWin)
     }
     painted = [...state.board]
-    els.board.dataset.over = String(over)
+    paintedResult = result
+    els.board.dataset.result = result
 
     paintStrike()
 
