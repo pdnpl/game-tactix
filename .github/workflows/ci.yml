@@ -87,10 +87,10 @@ jobs:
       - name: Sync web build into the iOS project
         run: npm run sync
 
-      - name: Install pods
-        working-directory: ios/App
-        run: pod install
-
+      # Capacitor 8 uses Swift Package Manager, not CocoaPods — there is no
+      # Podfile and no .xcworkspace, so this builds the project directly and
+      # lets Xcode resolve the local packages.
+      #
       # Simulator build, so no signing certificate or provisioning profile is
       # needed. This proves the project compiles and links; it does not produce
       # a distributable archive.
@@ -98,7 +98,7 @@ jobs:
         working-directory: ios/App
         run: |
           xcodebuild \
-            -workspace App.xcworkspace \
+            -project App.xcodeproj \
             -scheme App \
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \

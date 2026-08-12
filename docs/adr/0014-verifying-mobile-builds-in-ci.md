@@ -33,8 +33,29 @@ CI builds both apps on every pull request, as jobs alongside `ci`:
 21`. This was found by building locally first; had the workflow been trusted
   unverified, it would have failed on its first run.
 
-- **`ios`** — macOS runner, `npm run sync`, `pod install`, then `xcodebuild`
-  against the simulator SDK with `CODE_SIGNING_ALLOWED=NO`.
+- **`ios`** — macOS runner, `npm run sync`, then `xcodebuild` against the
+  simulator SDK with `CODE_SIGNING_ALLOWED=NO`. Capacitor 8 uses Swift Package
+  Manager rather than CocoaPods, so there is no `Podfile` and no
+  `.xcworkspace`: the job builds `App.xcodeproj` directly and lets Xcode
+  resolve the local packages.
+
+### The cross-platform trap this exposed
+
+`cap sync` writes `ios/App/CapApp-SPM/Package.swift` using the **host**
+path separator. Run on Windows it emits:
+
+```swift
+.package(name: "CapacitorApp", path: "..\..\..\node_modules\@capacitor\app")
+```
+
+Swift Package Manager cannot resolve those on macOS, so an iOS project
+generated on Windows does not build on the only platform that can build it —
+and nothing on the Windows machine would ever say so.
+
+`npm run sync` therefore chains `scripts/normalise-spm-paths.mjs`, which
+rewrites those quoted paths to forward slashes. Forward slashes are valid on
+every platform, so it is unconditional and idempotent, and it re-runs on every
+sync because the file is regenerated each time.
 
 The iOS job is a **simulator** build. It proves the project configures,
 compiles and links, and that the Capacitor plugins resolve. It deliberately does
