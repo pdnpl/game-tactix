@@ -67,9 +67,24 @@ body {
   color: var(--text);
   display: grid;
   place-items: center;
-  padding: clamp(0.75rem, 3vw, 2rem);
+  /* Keep the card clear of notches, rounded corners and the home indicator.
+     Pairs with viewport-fit=cover in index.html. */
+  padding: max(clamp(0.75rem, 3vw, 2rem), env(safe-area-inset-top))
+    max(clamp(0.75rem, 3vw, 2rem), env(safe-area-inset-right))
+    max(clamp(0.75rem, 3vw, 2rem), env(safe-area-inset-bottom))
+    max(clamp(0.75rem, 3vw, 2rem), env(safe-area-inset-left));
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+
+  /* Native-app feel: no grey flash on tap, no text selection from a long
+     press on the board, and no rubber-band scroll on a page that never
+     scrolls. */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+  /* Removes the ~300 ms double-tap-to-zoom delay without disabling pinch. */
+  touch-action: manipulation;
 }
 
 button {
@@ -157,10 +172,14 @@ button {
     transform 0.2s var(--ease-back);
 }
 
-.icon-btn:hover {
-  color: var(--text);
-  border-color: var(--border-hi);
-  transform: rotate(-18deg);
+/* Every :hover rule is gated on a real pointer. On touch, :hover latches after
+   a tap and would leave cells lifted and ghosts showing on played squares. */
+@media (hover: hover) {
+  .icon-btn:hover {
+    color: var(--text);
+    border-color: var(--border-hi);
+    transform: rotate(-18deg);
+  }
 }
 
 .icon-btn svg {
@@ -205,8 +224,10 @@ button {
     background-color 0.18s;
 }
 
-.segmented button:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .segmented button:hover {
+    color: var(--text);
+  }
 }
 
 .segmented button[aria-checked='true'] {
@@ -309,10 +330,12 @@ button {
     transform 0.2s var(--ease);
 }
 
-.cell[data-playable='true']:hover {
-  background: var(--surface-hi);
-  border-color: var(--border-hi);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .cell[data-playable='true']:hover {
+    background: var(--surface-hi);
+    border-color: var(--border-hi);
+    transform: translateY(-2px);
+  }
 }
 
 .cell[data-playable='true']:active {
@@ -368,7 +391,13 @@ button {
   transition: opacity 0.18s;
 }
 
-.cell[data-playable='true']:hover .ghost,
+@media (hover: hover) {
+  .cell[data-playable='true']:hover .ghost {
+    opacity: 0.2;
+  }
+}
+
+/* Keyboard focus shows the ghost on every device. */
 .cell[data-playable='true']:focus-visible .ghost {
   opacity: 0.2;
 }
@@ -488,9 +517,11 @@ button {
   color: #fff;
 }
 
-.primary:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .primary:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+  }
 }
 
 .primary:active {
@@ -499,6 +530,92 @@ button {
 
 .primary[hidden] {
   display: none;
+}
+
+/* ----------------------------------------------------------------- touch */
+
+/* Coarse pointers need larger targets than a mouse does. The controls keep
+   their visual size and grow their hit area, so nothing looks chunkier. */
+@media (pointer: coarse) {
+  .icon-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  /* Brings the segmented rows to ~44 px, the smallest comfortable touch target. */
+  .segmented button {
+    padding-block: 0.86rem;
+  }
+
+  .primary {
+    padding: 0.85rem;
+  }
+}
+
+/* A phone in landscape is shorter than the card is tall. Tighten spacing, and
+   let the page scroll rather than clipping the board. */
+@media (max-height: 34rem) {
+  body {
+    align-items: start;
+    overflow-y: auto;
+  }
+
+  .app {
+    gap: 0.65rem;
+    padding: 1rem;
+  }
+
+  /* Compact the scoreboard rather than hiding it — the running tally is the
+     reason to play another round. */
+  .score {
+    padding: 0.3rem 0.2rem;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+}
+
+/* Wide *and* short — a phone held sideways. Stacking wastes the width and
+   pushes the board off-screen, so put the board beside the controls and size
+   it to the height instead. Nothing scrolls. */
+@media (max-height: 34rem) and (min-width: 40rem) {
+  body {
+    align-items: center;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: minmax(10rem, 15rem) auto;
+    column-gap: 1.2rem;
+    row-gap: 0.5rem;
+    width: auto;
+    max-width: none;
+    align-items: start;
+  }
+
+  .masthead,
+  .controls,
+  .scoreboard,
+  .status,
+  .primary {
+    grid-column: 1;
+  }
+
+  /* Spans the whole left column and centres against it. `span 5` rather than
+     `1 / -1`: with no explicit grid-template-rows, `-1` resolves to the end of
+     the *explicit* grid — one row — and the board would drop below the
+     controls instead of sitting beside them. Five covers every left-column
+     row, including "Play again" once it appears. */
+  .board-wrap {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    align-self: center;
+  }
+
+  .board {
+    width: min(74vh, 17rem);
+  }
 }
 
 /* --------------------------------------------------------- reduced motion */
