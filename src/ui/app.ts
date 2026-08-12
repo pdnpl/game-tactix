@@ -8,12 +8,19 @@ import {
   turn,
   type State,
 } from '../game/session'
-import type { Cell, Difficulty, Mode } from '../game/types'
+import type { Board, Cell, Difficulty, Mode } from '../game/types'
 import { cellLabel, scoreLabels, statusText } from './copy'
 import { markSvg } from './marks'
+import { feedback, syncStatusBar } from './native'
 
 /** How long the AI appears to deliberate. Minimax itself takes under a millisecond. */
 const THINK_MS = 420
+
+function marksOn(board: Board): number {
+  let n = 0
+  for (const cell of board) if (cell !== null) n += 1
+  return n
+}
 
 type Els = {
   board: HTMLElement
@@ -217,15 +224,29 @@ export function mount(root: ParentNode = document): () => void {
     aiTimer = setTimeout(() => {
       aiTimer = undefined
       thinking = false
-      state = playAi(state)
-      render()
+      // Routed through commit so the AI's move — and a win it closes out — get
+      // the same feedback treatment as a human's.
+      commit(playAi(state))
     }, THINK_MS)
   }
 
   function commit(next: State) {
     if (next === state) return
+    const previous = state
     state = next
     render()
+
+    // Physical response, once per transition, after the paint. "A mark was
+    // added" is counted rather than inferred from the board changing identity —
+    // starting a round or switching mode also replaces the board, and neither
+    // should feel like a move.
+    if (state.outcome.kind !== previous.outcome.kind) {
+      if (state.outcome.kind === 'win') feedback('win')
+      else if (state.outcome.kind === 'draw') feedback('draw')
+    } else if (marksOn(state.board) === marksOn(previous.board) + 1) {
+      feedback('move')
+    }
+
     scheduleAi()
   }
 
@@ -235,7 +256,15 @@ export function mount(root: ParentNode = document): () => void {
     if (thinking) return
     const cell = (e.target as HTMLElement).closest<HTMLElement>('.cell')
     if (!cell) return
-    commit(play(state, Number(cell.dataset.index)))
+
+    const index = Number(cell.dataset.index)
+    // Tapping a taken square has no cursor to explain itself on touch, so the
+    // rejection is answered physically instead.
+    if (state.outcome.kind === 'playing' && state.board[index] !== null) {
+      feedback('blocked')
+      return
+    }
+    commit(play(state, index))
   })
 
   els.board.addEventListener('keydown', (e) => {
@@ -306,6 +335,7 @@ export function mount(root: ParentNode = document): () => void {
     const dark = docEl.dataset.theme !== 'dark'
     docEl.dataset.theme = dark ? 'dark' : 'light'
     syncThemeLabel()
+    syncStatusBar()
     try {
       localStorage.setItem('tactix.theme', dark ? 'dark' : 'light')
     } catch {
