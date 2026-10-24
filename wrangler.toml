@@ -1,4 +1,4 @@
-name = "tactix"
+name = "game-tactix"
 compatibility_date = "2026-08-01"
 
 # Static-asset-only Worker: Cloudflare serves dist/ straight from its edge cache
